@@ -45,6 +45,9 @@ EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 COMPANY_EMAIL = os.getenv("COMPANY_EMAIL", EMAIL_USER)
 
+# Calendly link for scheduling
+calendly_link = os.getenv("CALENDLY_LINK")
+
 # Initialize Supabase client
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -483,7 +486,11 @@ Thank you for your interest in our professional short-term rental cleaning servi
 ✓ Flexible Scheduling - Book cleanings that work with your schedule, including same-day availability
 ✓ Eco-Friendly Products - Safe, non-toxic cleaning supplies that protect your family and the environment
 
-Ready to book your professional cleaning? Reply to this email or contact us directly.
+Ready to book your professional cleaning? 
+
+📅 SCHEDULE YOUR APPOINTMENT {calendly_link}
+
+Click the link above to choose a time that works best for you.
 
 Best regards,
 Clean Key Team
