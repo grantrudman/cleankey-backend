@@ -4,8 +4,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
 import os
-import smtplib
-from email.message import EmailMessage
+import requests
 import math
 import asyncio
 import logging
@@ -39,10 +38,7 @@ app.add_middleware(
 # 🚩 UPDATE THESE LINES WITH YOUR SUPABASE CREDENTIALS 🚩
 SUPABASE_URL = os.getenv("SUPABASE_URL")  # Your Supabase project URL
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")  # Your Supabase anon/public key
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp-relay.brevo.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_USER = os.getenv("EMAIL_USER", "957aff001@smtp-brevo.com")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")  # Your Brevo (Sendinblue) API key
 COMPANY_EMAIL = os.getenv("COMPANY_EMAIL", "cleankey.business@gmail.com")
 
 # Calendly link for scheduling
@@ -440,18 +436,13 @@ async def save_quote_to_db(request: QuoteRequest, breakdown: QuoteBreakdown) -> 
         return "error"
 
 async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quote_id: str):
-    """Send simplified quote email to customer with clickable Calendly link"""
-    if not all([EMAIL_USER, EMAIL_PASSWORD]):
-        logger.warning("Email credentials not set, skipping email send")
+    """Send simplified quote email to customer using Brevo HTTP API"""
+    if not BREVO_API_KEY:
+        logger.warning("Brevo API key not set, skipping email send")
         return
     
     try:
-        msg = EmailMessage()
-        msg['Subject'] = 'Your Short-Term Rental Cleaning Quote'
-        msg['From'] = COMPANY_EMAIL
-        msg['To'] = request.email
-        
-        # Extract first name for personalization (from full_name)
+        # Extract first name for personalization
         first_name = request.full_name.split()[0] if request.full_name else "there"
         
         # Create location string
@@ -459,7 +450,7 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
         location_str = ", ".join([part for part in location_parts if part])
         location_display = f" in {location_str}" if location_str else ""
         
-        # HTML email content with clickable Calendly link
+        # HTML email content (keep your existing HTML content here)
         html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -539,55 +530,30 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
 </html>
         """
         
-        # Plain text fallback (your original content)
-        text_content = f"""
-Hello {first_name}!
-
-Thank you for your interest in our professional short-term rental cleaning services{location_display}!
-
-✨ YOUR QUOTE: ${breakdown.final_quote}
-
-🏠 YOUR PROPERTY:
-• Total bedrooms: {max(request.beds, request.bedrooms)}
-• Full bathrooms: {request.full_bathrooms}
-• Half bathrooms: {request.half_bathrooms}
-• Living rooms: {request.living_rooms}
-• Kitchens: {request.kitchens}
-• Carpet area: {request.carpet_area} sq ft
-• Hard floors: {request.hard_floors_area} sq ft
-• Extra spaces: {request.extra_spaces}
-• Exterior features: {request.exterior_features}
-{"• Pet-friendly cleaning included" if request.pets_allowed else ""}
-
-🧹 WHY CHOOSE CLEAN KEY:
-✓ Vetted & Insured Cleaners - All our cleaners are background-checked and fully insured for your peace of mind
-✓ Quality Guarantee - Not satisfied? We'll return within 24 hours to make it right, at no extra cost
-✓ Transparent Pricing - No hidden fees or surprises - the price you see is exactly what you pay
-✓ Flexible Scheduling - Book cleanings that work with your schedule, including same-day availability
-✓ Eco-Friendly Products - Safe, non-toxic cleaning supplies that protect your family and the environment
-
-Ready to book your professional cleaning? 
-
-📅 SCHEDULE YOUR APPOINTMENT: {calendly_link}
-
-Click the link above to choose a time that works best for you.
-
-Best regards,
-Clean Key Team
-        """
+        # Brevo API request
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "api-key": BREVO_API_KEY,
+            "Content-Type": "application/json"
+        }
         
-        # Set both plain text and HTML content
-        msg.set_content(text_content)  # Plain text version (fallback)
-        msg.add_alternative(html_content, subtype='html')  # HTML version (primary)
+        data = {
+            "sender": {
+                "name": "Clean Key",
+                "email": COMPANY_EMAIL
+            },
+            "to": [{"email": request.email, "name": request.full_name}],
+            "subject": "Your Short-Term Rental Cleaning Quote",
+            "htmlContent": html_content
+        }
         
-        # Send email via Brevo
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
-            server.starttls()
-            server.login(EMAIL_USER, EMAIL_PASSWORD)
-            server.send_message(msg)
+        response = requests.post(url, json=data, headers=headers)
+        
+        if response.status_code == 201:
+            logger.info(f"Quote email sent successfully to {request.email}")
+        else:
+            logger.error(f"Email send failed: {response.status_code} - {response.text}")
             
-        logger.info(f"Quote email sent successfully to {request.email}")
-        
     except Exception as e:
         logger.error(f"Email send error: {e}")
 
