@@ -338,7 +338,7 @@ def calculate_quote(request: QuoteRequest) -> QuoteBreakdown:
     # Constants
     BASE_HOURLY_RATE = 30.0
     PROFIT_MARGIN_PCT = 0.35
-    FLAT_FEE = 40.0
+    FLAT_FEE = 30.0
     MAX_HOURS_PER_CLEANER = 4.0
     PET_MULTIPLIER = 1.2
     
