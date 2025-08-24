@@ -309,8 +309,8 @@ def calculate_labor_hours(request: QuoteRequest) -> float:
     # Base room calculations - use both beds and bedrooms (take max)
     total_bedrooms = max(request.beds, request.bedrooms)
     hours += total_bedrooms * 0.5  # 0.5 hours per bedroom
-    hours += request.full_bathrooms * 0.75  # 0.75 hours per full bathroom
-    hours += request.half_bathrooms * 0.5  # 0.5 hours per half bathroom
+    hours += request.full_bathrooms * 0.5  # 0.75 hours per full bathroom
+    hours += request.half_bathrooms * 0.25  # 0.25 hours per half bathroom
     hours += request.living_rooms * 0.5  # 0.5 hours per living room
     hours += request.kitchens * 1.0  # 1 hour per kitchen
     
@@ -337,7 +337,7 @@ def calculate_quote(request: QuoteRequest) -> QuoteBreakdown:
     """Calculate the full quote with all adjustments"""
     # Constants
     BASE_HOURLY_RATE = 30.0
-    PROFIT_MARGIN_PCT = 0.35
+    PROFIT_MARGIN_PCT = 0.30
     FLAT_FEE = 30.0
     MAX_HOURS_PER_CLEANER = 4.0
     PET_MULTIPLIER = 1.2
