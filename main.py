@@ -39,11 +39,11 @@ app.add_middleware(
 # 🚩 UPDATE THESE LINES WITH YOUR SUPABASE CREDENTIALS 🚩
 SUPABASE_URL = os.getenv("SUPABASE_URL")  # Your Supabase project URL
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")  # Your Supabase anon/public key
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp-relay.brevo.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_USER = os.getenv("EMAIL_USER")
+EMAIL_USER = os.getenv("EMAIL_USER", "957aff001@smtp-brevo.com")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-COMPANY_EMAIL = os.getenv("COMPANY_EMAIL", EMAIL_USER)
+COMPANY_EMAIL = os.getenv("COMPANY_EMAIL", "cleankey.business@gmail.com")
 
 # Calendly link for scheduling
 calendly_link = os.getenv("CALENDLY_LINK")
@@ -440,7 +440,7 @@ async def save_quote_to_db(request: QuoteRequest, breakdown: QuoteBreakdown) -> 
         return "error"
 
 async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quote_id: str):
-    """Send simplified quote email to customer - Total quote, property info, and Clean Key value adds only"""
+    """Send simplified quote email to customer with clickable Calendly link"""
     if not all([EMAIL_USER, EMAIL_PASSWORD]):
         logger.warning("Email credentials not set, skipping email send")
         return
@@ -459,8 +459,88 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
         location_str = ", ".join([part for part in location_parts if part])
         location_display = f" in {location_str}" if location_str else ""
         
-        # Simplified email content - ONLY quote, property info, and Clean Key value adds
-        email_content = f"""
+        # HTML email content with clickable Calendly link
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+    
+    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        
+        <h2 style="color: #2c3e50; margin-bottom: 20px;">Hello {first_name}!</h2>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            Thank you for your interest in our professional short-term rental cleaning services{location_display}!
+        </p>
+        
+        <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
+            <h3 style="color: #27ae60; font-size: 24px; margin: 0;">✨ YOUR QUOTE: ${breakdown.final_quote}</h3>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <h4 style="color: #2c3e50; margin-bottom: 15px;">🏠 YOUR PROPERTY:</h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 3px 0;">• Total bedrooms: <strong>{max(request.beds, request.bedrooms)}</strong></li>
+                <li style="padding: 3px 0;">• Full bathrooms: <strong>{request.full_bathrooms}</strong></li>
+                <li style="padding: 3px 0;">• Half bathrooms: <strong>{request.half_bathrooms}</strong></li>
+                <li style="padding: 3px 0;">• Living rooms: <strong>{request.living_rooms}</strong></li>
+                <li style="padding: 3px 0;">• Kitchens: <strong>{request.kitchens}</strong></li>
+                <li style="padding: 3px 0;">• Carpet area: <strong>{request.carpet_area} sq ft</strong></li>
+                <li style="padding: 3px 0;">• Hard floors: <strong>{request.hard_floors_area} sq ft</strong></li>
+                <li style="padding: 3px 0;">• Extra spaces: <strong>{request.extra_spaces}</strong></li>
+                <li style="padding: 3px 0;">• Exterior features: <strong>{request.exterior_features}</strong></li>
+                {"<li style='padding: 3px 0;'>• <strong>Pet-friendly cleaning included</strong></li>" if request.pets_allowed else ""}
+            </ul>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <h4 style="color: #2c3e50; margin-bottom: 15px;">🧹 WHY CHOOSE CLEAN KEY:</h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 5px 0;">✓ <strong>Vetted & Insured Cleaners</strong> - All our cleaners are background-checked and fully insured for your peace of mind</li>
+                <li style="padding: 5px 0;">✓ <strong>Quality Guarantee</strong> - Not satisfied? We'll return within 24 hours to make it right, at no extra cost</li>
+                <li style="padding: 5px 0;">✓ <strong>Transparent Pricing</strong> - No hidden fees or surprises - the price you see is exactly what you pay</li>
+                <li style="padding: 5px 0;">✓ <strong>Flexible Scheduling</strong> - Book cleanings that work with your schedule, including same-day availability</li>
+                <li style="padding: 5px 0;">✓ <strong>Eco-Friendly Products</strong> - Safe, non-toxic cleaning supplies that protect your family and the environment</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="font-size: 18px; margin-bottom: 20px;"><strong>Ready to book your professional cleaning?</strong></p>
+            
+            <a href="{calendly_link}" 
+               style="display: inline-block; 
+                      background-color: #3498db; 
+                      color: white !important; 
+                      padding: 15px 30px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-size: 16px; 
+                      font-weight: bold;
+                      margin: 10px 0;">
+                📅 SCHEDULE YOUR APPOINTMENT
+            </a>
+            
+            <p style="font-size: 14px; color: #666; margin-top: 15px;">
+                Click the button above to choose a time that works best for you.
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="margin: 5px 0;">Best regards,</p>
+            <p style="margin: 5px 0; font-weight: bold; color: #2c3e50;">Clean Key Team</p>
+        </div>
+        
+    </div>
+</body>
+</html>
+        """
+        
+        # Plain text fallback (your original content)
+        text_content = f"""
 Hello {first_name}!
 
 Thank you for your interest in our professional short-term rental cleaning services{location_display}!
@@ -488,18 +568,19 @@ Thank you for your interest in our professional short-term rental cleaning servi
 
 Ready to book your professional cleaning? 
 
-📅 SCHEDULE YOUR APPOINTMENT {calendly_link}
+📅 SCHEDULE YOUR APPOINTMENT: {calendly_link}
 
 Click the link above to choose a time that works best for you.
 
 Best regards,
 Clean Key Team
-        
         """
         
-        msg.set_content(email_content)
+        # Set both plain text and HTML content
+        msg.set_content(text_content)  # Plain text version (fallback)
+        msg.add_alternative(html_content, subtype='html')  # HTML version (primary)
         
-        # Send email
+        # Send email via Brevo
         with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
             server.starttls()
             server.login(EMAIL_USER, EMAIL_PASSWORD)
