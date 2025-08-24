@@ -450,86 +450,135 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
         location_str = ", ".join([part for part in location_parts if part])
         location_display = f" in {location_str}" if location_str else ""
         
-        # HTML email content (keep your existing HTML content here)
+        # HTML email content matching CleanKey website aesthetic
         html_content = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-    
-    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        
-        <h2 style="color: #2c3e50; margin-bottom: 20px;">Hello {first_name}!</h2>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            Thank you for your interest in our professional short-term rental cleaning services{location_display}!
-        </p>
-        
-        <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
-            <h3 style="color: #27ae60; font-size: 24px; margin: 0;">✨ YOUR QUOTE: ${breakdown.final_quote}</h3>
-        </div>
-        
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
-            <h4 style="color: #2c3e50; margin-bottom: 15px;">🏠 YOUR PROPERTY:</h4>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                <li style="padding: 3px 0;">• Total bedrooms: <strong>{max(request.beds, request.bedrooms)}</strong></li>
-                <li style="padding: 3px 0;">• Full bathrooms: <strong>{request.full_bathrooms}</strong></li>
-                <li style="padding: 3px 0;">• Half bathrooms: <strong>{request.half_bathrooms}</strong></li>
-                <li style="padding: 3px 0;">• Living rooms: <strong>{request.living_rooms}</strong></li>
-                <li style="padding: 3px 0;">• Kitchens: <strong>{request.kitchens}</strong></li>
-                <li style="padding: 3px 0;">• Carpet area: <strong>{request.carpet_area} sq ft</strong></li>
-                <li style="padding: 3px 0;">• Hard floors: <strong>{request.hard_floors_area} sq ft</strong></li>
-                <li style="padding: 3px 0;">• Extra spaces: <strong>{request.extra_spaces}</strong></li>
-                <li style="padding: 3px 0;">• Exterior features: <strong>{request.exterior_features}</strong></li>
-                {"<li style='padding: 3px 0;'>• <strong>Pet-friendly cleaning included</strong></li>" if request.pets_allowed else ""}
-            </ul>
-        </div>
-        
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
-            <h4 style="color: #2c3e50; margin-bottom: 15px;">🧹 WHY CHOOSE CLEAN KEY:</h4>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                <li style="padding: 5px 0;">✓ <strong>Vetted & Insured Cleaners</strong> - All our cleaners are background-checked and fully insured for your peace of mind</li>
-                <li style="padding: 5px 0;">✓ <strong>Quality Guarantee</strong> - Not satisfied? We'll return within 24 hours to make it right, at no extra cost</li>
-                <li style="padding: 5px 0;">✓ <strong>Transparent Pricing</strong> - No hidden fees or surprises - the price you see is exactly what you pay</li>
-                <li style="padding: 5px 0;">✓ <strong>Flexible Scheduling</strong> - Book cleanings that work with your schedule, including same-day availability</li>
-                <li style="padding: 5px 0;">✓ <strong>Eco-Friendly Products</strong> - Safe, non-toxic cleaning supplies that protect your family and the environment</li>
-            </ul>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0;">
-            <p style="font-size: 18px; margin-bottom: 20px;"><strong>Ready to book your professional cleaning?</strong></p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
             
-            <a href="{calendly_link}" 
-               style="display: inline-block; 
-                      background-color: #3498db; 
-                      color: white !important; 
-                      padding: 15px 30px; 
-                      text-decoration: none; 
-                      border-radius: 5px; 
-                      font-size: 16px; 
-                      font-weight: bold;
-                      margin: 10px 0;">
-                📅 SCHEDULE YOUR APPOINTMENT
-            </a>
-            
-            <p style="font-size: 14px; color: #666; margin-top: 15px;">
-                Click the button above to choose a time that works best for you.
-            </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-            <p style="margin: 5px 0;">Best regards,</p>
-            <p style="margin: 5px 0; font-weight: bold; color: #2c3e50;">Clean Key Team</p>
-        </div>
-        
-    </div>
-</body>
-</html>
-        """
-        
+            <div style="background-color: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
+                
+                <!-- Header Section with Logo -->
+                <div style="background-color: #faf8f5; padding: 30px 25px 25px 25px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+                    <img src="https://cleankey-frontend.vercel.app/_next/static/media/logo.a2b0d8a5.png" 
+                        alt="CleanKey Logo" 
+                        style="max-width: 120px; height: auto;">
+                </div>
+                
+                <!-- Main Content -->
+                <div style="padding: 30px 25px;">
+                    
+                    <h2 style="color: #1a1a1a; margin-bottom: 20px; font-size: 24px; font-weight: 600;">Hello {first_name}!</h2>
+                    
+                    <p style="font-size: 16px; margin-bottom: 25px; color: #4a5568;">
+                        Thank you for your interest in our professional short-term rental cleaning services{location_display}!
+                    </p>
+                    
+                    <!-- Quote Section -->
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 10px; text-align: center; margin: 30px 0;">
+                        <h3 style="color: white; font-size: 28px; margin: 0; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.1);">YOUR QUOTE: ${breakdown.final_quote}</h3>
+                    </div>
+                    
+                    <!-- Property Details -->
+                    <div style="background-color: #f8fafc; padding: 25px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #10b981;">
+                        <h4 style="color: #1a1a1a; margin-bottom: 18px; font-size: 18px; font-weight: 600;">YOUR PROPERTY:</h4>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="padding: 6px 0; color: #4a5568;">• Total bedrooms: <strong style="color: #1a1a1a;">{max(request.beds, request.bedrooms)}</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Full bathrooms: <strong style="color: #1a1a1a;">{request.full_bathrooms}</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Half bathrooms: <strong style="color: #1a1a1a;">{request.half_bathrooms}</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Living rooms: <strong style="color: #1a1a1a;">{request.living_rooms}</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Kitchens: <strong style="color: #1a1a1a;">{request.kitchens}</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Carpet area: <strong style="color: #1a1a1a;">{request.carpet_area} sq ft</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Hard floors: <strong style="color: #1a1a1a;">{request.hard_floors_area} sq ft</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Extra spaces: <strong style="color: #1a1a1a;">{request.extra_spaces}</strong></div>
+                            <div style="padding: 6px 0; color: #4a5568;">• Exterior features: <strong style="color: #1a1a1a;">{request.exterior_features}</strong></div>
+                            {"<div style='padding: 6px 0; color: #10b981;'>• <strong>Pet-friendly cleaning included</strong></div>" if request.pets_allowed else ""}
+                        </div>
+                    </div>
+                    
+                    <!-- Why Choose CleanKey -->
+                    <div style="background-color: #fefefe; padding: 25px; border-radius: 10px; margin: 25px 0; border: 1px solid #e2e8f0;">
+                        <h4 style="color: #1a1a1a; margin-bottom: 20px; font-size: 18px; font-weight: 600;">WHY CHOOSE CLEANKEY:</h4>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="color: #10b981; font-size: 18px; font-weight: bold; margin-top: 2px;">✓</span>
+                                <div>
+                                    <strong style="color: #1a1a1a;">Vetted & Insured Cleaners</strong>
+                                    <div style="color: #4a5568; font-size: 14px; margin-top: 2px;">All our cleaners are background-checked and fully insured for your peace of mind</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="color: #10b981; font-size: 18px; font-weight: bold; margin-top: 2px;">✓</span>
+                                <div>
+                                    <strong style="color: #1a1a1a;">Quality Guarantee</strong>
+                                    <div style="color: #4a5568; font-size: 14px; margin-top: 2px;">Not satisfied? We'll return within 24 hours to make it right, at no extra cost</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="color: #10b981; font-size: 18px; font-weight: bold; margin-top: 2px;">✓</span>
+                                <div>
+                                    <strong style="color: #1a1a1a;">Transparent Pricing</strong>
+                                    <div style="color: #4a5568; font-size: 14px; margin-top: 2px;">No hidden fees or surprises - the price you see is exactly what you pay</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="color: #10b981; font-size: 18px; font-weight: bold; margin-top: 2px;">✓</span>
+                                <div>
+                                    <strong style="color: #1a1a1a;">Flexible Scheduling</strong>
+                                    <div style="color: #4a5568; font-size: 14px; margin-top: 2px;">Book cleanings that work with your schedule, including same-day availability</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="color: #10b981; font-size: 18px; font-weight: bold; margin-top: 2px;">✓</span>
+                                <div>
+                                    <strong style="color: #1a1a1a;">Eco-Friendly Products</strong>
+                                    <div style="color: #4a5568; font-size: 14px; margin-top: 2px;">Safe, non-toxic cleaning supplies that protect your family and the environment</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Call to Action -->
+                    <div style="text-align: center; margin: 35px 0;">
+                        <p style="font-size: 20px; margin-bottom: 25px; color: #1a1a1a; font-weight: 600;">Ready to book your professional cleaning?</p>
+                        
+                        <a href="{calendly_link}" 
+                        style="display: inline-block; 
+                                background: linear-gradient(135deg, #1f2937 0%, #111827 100%); 
+                                color: white !important; 
+                                padding: 16px 32px; 
+                                text-decoration: none; 
+                                border-radius: 8px; 
+                                font-size: 16px; 
+                                font-weight: 600;
+                                margin: 10px 0;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                                transition: all 0.2s ease;">
+                            TALK WITH OUR TEAM
+                        </a>
+                        
+                        <p style="font-size: 14px; color: #6b7280; margin-top: 18px;">
+                            Click the button above to choose a time that works best for you.
+                        </p>
+                    </div>
+                    
+                </div>
+                
+                <!-- Footer -->
+                <div style="background-color: #f8fafc; text-align: center; padding: 25px; border-top: 1px solid #e2e8f0;">
+                    <p style="margin: 5px 0; color: #4a5568;">Best regards,</p>
+                    <p style="margin: 5px 0; font-weight: 600; color: #1a1a1a; font-size: 16px;">CleanKey Team</p>
+                </div>
+                
+            </div>
+        </body>
+        </html>
+                """
+
         # Brevo API request
         url = "https://api.brevo.com/v3/smtp/email"
         headers = {
