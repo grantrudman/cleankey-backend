@@ -463,7 +463,7 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
             <div style="background-color: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
                 
                 <!-- Header Section with Logo -->
-                <div style="background-color: #faf8f5; padding: 30px 25px 25px 25px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+                <div style="background-color: #FCFBF8; padding: 30px 25px 25px 25px; text-align: center; border-bottom: 1px solid #f0f0f0;">
                     <img src="https://cleankey-frontend.vercel.app/_next/static/media/logo.a2b0d8a5.png" 
                         alt="CleanKey Logo" 
                         style="max-width: 120px; height: auto;">
