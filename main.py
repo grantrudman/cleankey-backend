@@ -450,6 +450,208 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
         location_str = ", ".join([part for part in location_parts if part])
         location_display = f" in {location_str}" if location_str else ""
         
+        # HTML email content with fixed color consistency
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style type="text/css">
+                /* Force light mode and override dark mode */
+                @media (prefers-color-scheme: dark) {{
+                    .email-container {{ background-color: #f8f9fa !important; color: #1a1a1a !important; }}
+                    .main-card {{ background-color: #ffffff !important; color: #1a1a1a !important; }}
+                    .header-section {{ background-color: #ffffff !important; color: #1a1a1a !important; }}
+                    .text-primary {{ color: #1a1a1a !important; }}
+                    .text-secondary {{ color: #4a5568 !important; }}
+                    .text-muted {{ color: #6b7280 !important; }}
+                }}
+                
+                /* Prevent email client overrides */
+                * {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
+                table {{ border-collapse: collapse !important; }}
+                
+                /* Responsive design */
+                @media screen and (max-width: 600px) {{
+                    .email-container {{ width: 95% !important; padding: 10px !important; }}
+                    .main-card {{ border-radius: 8px !important; }}
+                    .header-section {{ padding: 20px 15px !important; }}
+                    .content-section {{ padding: 20px 15px !important; }}
+                    .quote-section {{ padding: 20px !important; margin: 20px 0 !important; }}
+                    .property-details {{ padding: 20px !important; margin: 20px 0 !important; }}
+                    .why-choose {{ padding: 20px !important; margin: 20px 0 !important; }}
+                    .footer-section {{ padding: 20px !important; }}
+                }}
+            </style>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f8f9fa !important; color-scheme: light !important;">
+            
+            <div class="email-container" style="max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f8f9fa !important;">
+                
+                <div class="main-card" style="background-color: #ffffff !important; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
+                    
+                    <!-- Header Section with Logo -->
+                    <div class="header-section" style="background-color: #ffffff !important; padding: 30px 25px 25px 25px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+                        <img src="https://cleankey-frontend.vercel.app/_next/static/media/logo.a2b0d8a5.png" 
+                            alt="CleanKey Logo" 
+                            style="max-width: 120px; height: auto; display: block; margin: 0 auto; background-color: transparent;">
+                    </div>
+                    
+                    <!-- Main Content -->
+                    <div class="content-section" style="padding: 30px 25px; background-color: #ffffff !important;">
+                        
+                        <h2 class="text-primary" style="color: #1a1a1a !important; margin-bottom: 20px; font-size: 24px; font-weight: 600;">Hello {first_name}!</h2>
+                        
+                        <p class="text-secondary" style="font-size: 16px; margin-bottom: 25px; color: #4a5568 !important;">
+                            Thank you for your interest in our professional short-term rental cleaning services{location_display}!
+                        </p>
+                        
+                        <!-- Quote Section -->
+                        <div class="quote-section" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; padding: 25px; border-radius: 10px; text-align: center; margin: 30px 0;">
+                            <h3 style="color: #ffffff !important; font-size: 28px; margin: 0; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.1);">YOUR QUOTE: ${breakdown.final_quote}</h3>
+                        </div>
+                        
+                        <!-- Property Details -->
+                        <div class="property-details" style="background-color: #f8fafc !important; padding: 25px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #10b981;">
+                            <h4 class="text-primary" style="color: #1a1a1a !important; margin-bottom: 18px; font-size: 18px; font-weight: 600;">YOUR PROPERTY:</h4>
+                            <div style="display: block;">
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Total bedrooms: <strong style="color: #1a1a1a !important;">{max(request.beds, request.bedrooms)}</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Full bathrooms: <strong style="color: #1a1a1a !important;">{request.full_bathrooms}</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Half bathrooms: <strong style="color: #1a1a1a !important;">{request.half_bathrooms}</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Living rooms: <strong style="color: #1a1a1a !important;">{request.living_rooms}</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Kitchens: <strong style="color: #1a1a1a !important;">{request.kitchens}</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Carpet area: <strong style="color: #1a1a1a !important;">{request.carpet_area} sq ft</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Hard floors: <strong style="color: #1a1a1a !important;">{request.hard_floors_area} sq ft</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Extra spaces: <strong style="color: #1a1a1a !important;">{request.extra_spaces}</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Exterior features: <strong style="color: #1a1a1a !important;">{request.exterior_features}</strong></div>
+                                {"<div style='padding: 6px 0; color: #10b981 !important;'>• <strong style='color: #10b981 !important;'>Pet-friendly cleaning included</strong></div>" if request.pets_allowed else ""}
+                            </div>
+                        </div>
+                        
+                        <!-- Why Choose CleanKey -->
+                        <div class="why-choose" style="background-color: #ffffff !important; padding: 25px; border-radius: 10px; margin: 25px 0; border: 1px solid #e2e8f0;">
+                            <h4 class="text-primary" style="color: #1a1a1a !important; margin-bottom: 20px; font-size: 18px; font-weight: 600;">WHY CHOOSE CLEANKEY:</h4>
+                            <div style="display: block;">
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: block;">
+                                        <span style="color: #10b981 !important; font-size: 18px; font-weight: bold;">✓</span>
+                                        <strong style="color: #1a1a1a !important; margin-left: 8px;">Vetted & Insured Cleaners</strong>
+                                    </div>
+                                    <div style="color: #4a5568 !important; font-size: 14px; margin-top: 4px; margin-left: 26px;">All our cleaners are background-checked and fully insured for your peace of mind</div>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: block;">
+                                        <span style="color: #10b981 !important; font-size: 18px; font-weight: bold;">✓</span>
+                                        <strong style="color: #1a1a1a !important; margin-left: 8px;">Quality Guarantee</strong>
+                                    </div>
+                                    <div style="color: #4a5568 !important; font-size: 14px; margin-top: 4px; margin-left: 26px;">Not satisfied? We'll return within 24 hours to make it right, at no extra cost</div>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: block;">
+                                        <span style="color: #10b981 !important; font-size: 18px; font-weight: bold;">✓</span>
+                                        <strong style="color: #1a1a1a !important; margin-left: 8px;">Transparent Pricing</strong>
+                                    </div>
+                                    <div style="color: #4a5568 !important; font-size: 14px; margin-top: 4px; margin-left: 26px;">No hidden fees or surprises - the price you see is exactly what you pay</div>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: block;">
+                                        <span style="color: #10b981 !important; font-size: 18px; font-weight: bold;">✓</span>
+                                        <strong style="color: #1a1a1a !important; margin-left: 8px;">Flexible Scheduling</strong>
+                                    </div>
+                                    <div style="color: #4a5568 !important; font-size: 14px; margin-top: 4px; margin-left: 26px;">Book cleanings that work with your schedule, including same-day availability</div>
+                                </div>
+                                <div style="margin-bottom: 0;">
+                                    <div style="display: block;">
+                                        <span style="color: #10b981 !important; font-size: 18px; font-weight: bold;">✓</span>
+                                        <strong style="color: #1a1a1a !important; margin-left: 8px;">Eco-Friendly Products</strong>
+                                    </div>
+                                    <div style="color: #4a5568 !important; font-size: 14px; margin-top: 4px; margin-left: 26px;">Safe, non-toxic cleaning supplies that protect your family and the environment</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Call to Action -->
+                        <div style="text-align: center; margin: 35px 0;">
+                            <p class="text-primary" style="font-size: 20px; margin-bottom: 25px; color: #1a1a1a !important; font-weight: 600;">Ready to book your professional cleaning?</p>
+                            
+                            <a href="{calendly_link}" 
+                            style="display: inline-block; 
+                                    background: linear-gradient(135deg, #1f2937 0%, #111827 100%) !important; 
+                                    color: #ffffff !important; 
+                                    padding: 16px 32px; 
+                                    text-decoration: none; 
+                                    border-radius: 8px; 
+                                    font-size: 16px; 
+                                    font-weight: 600;
+                                    margin: 10px 0;
+                                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                                    border: none;
+                                    cursor: pointer;">
+                                TALK WITH OUR TEAM
+                            </a>
+                            
+                            <p class="text-muted" style="font-size: 14px; color: #6b7280 !important; margin-top: 18px;">
+                                Click the button above to choose a time that works best for you.
+                            </p>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="footer-section" style="background-color: #f8fafc !important; text-align: center; padding: 25px; border-top: 1px solid #e2e8f0;">
+                        <p style="margin: 5px 0; color: #4a5568 !important;">Best regards,</p>
+                        <p style="margin: 5px 0; font-weight: 600; color: #1a1a1a !important; font-size: 16px;">CleanKey Team</p>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </body>
+        </html>
+                """
+
+        # Brevo API request
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "api-key": BREVO_API_KEY,
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "sender": {
+                "name": "Clean Key",
+                "email": COMPANY_EMAIL
+            },
+            "to": [{"email": request.email, "name": request.full_name}],
+            "subject": "Your Short-Term Rental Cleaning Quote",
+            "htmlContent": html_content
+        }
+        
+        response = requests.post(url, json=data, headers=headers)
+        
+        if response.status_code == 201:
+            logger.info(f"Quote email sent successfully to {request.email}")
+        else:
+            logger.error(f"Email send failed: {response.status_code} - {response.text}")
+            
+    except Exception as e:
+        logger.error(f"Email send error: {e}")
+
+    """Send simplified quote email to customer using Brevo HTTP API"""
+    if not BREVO_API_KEY:
+        logger.warning("Brevo API key not set, skipping email send")
+        return
+    
+    try:
+        # Extract first name for personalization
+        first_name = request.full_name.split()[0] if request.full_name else "there"
+        
+        # Create location string
+        location_parts = [request.city, request.state]
+        location_str = ", ".join([part for part in location_parts if part])
+        location_display = f" in {location_str}" if location_str else ""
+        
         # HTML email content matching CleanKey website aesthetic
         html_content = f"""
         <!DOCTYPE html>
@@ -588,7 +790,7 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
         
         data = {
             "sender": {
-                "name": "Clean Key",
+                "name": "CleanKey",
                 "email": COMPANY_EMAIL
             },
             "to": [{"email": request.email, "name": request.full_name}],
