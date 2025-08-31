@@ -307,11 +307,11 @@ def calculate_labor_hours(request: QuoteRequest) -> float:
     
     # Base room calculations - use both beds and bedrooms (take max)
     total_bedrooms = max(request.beds, request.bedrooms)
-    hours += total_bedrooms * 0.5  # 0.5 hours per bedroom
+    hours += total_bedrooms * 0.3  # 0.3 hours per bedroom
     hours += request.full_bathrooms * 0.5  # 0.75 hours per full bathroom
     hours += request.half_bathrooms * 0.25  # 0.25 hours per half bathroom
-    hours += request.living_rooms * 0.5  # 0.5 hours per living room
-    hours += request.kitchens * 1.0  # 1 hour per kitchen
+    hours += request.living_rooms * 0.3  # 0.5 hours per living room
+    hours += request.kitchens * 0.6 # 1 hour per kitchen
     
     # Square footage calculations
     hours += request.carpet_area * 0.0003  # Carpet cleaning time
@@ -320,26 +320,26 @@ def calculate_labor_hours(request: QuoteRequest) -> float:
     # Laundry time (always included)
     hours += 0.5  # Base laundry time
     
-    # Extra spaces (estimate 0.3 hours each)
-    hours += request.extra_spaces * 0.3
+    # Extra spaces (estimate 0.25 hours each)
+    hours += request.extra_spaces * 0.20
     
     # Exterior features (estimate 0.25 hours each)  
-    hours += request.exterior_features * 0.25
+    hours += request.exterior_features * 0.20
     
     # Pet multiplier (20% increase)
     if request.pets_allowed:
-        hours *= 1.2
+        hours *= 1.1
     
     return round(hours, 2)
 
 def calculate_quote(request: QuoteRequest) -> QuoteBreakdown:
     """Calculate the full quote with all adjustments"""
     # Constants
-    BASE_HOURLY_RATE = 30.0
-    PROFIT_MARGIN_PCT = 0.30
-    FLAT_FEE = 30.0
+    BASE_HOURLY_RATE = 25.0
+    PROFIT_MARGIN_PCT = 0.25
+    FLAT_FEE = 25.0
     MAX_HOURS_PER_CLEANER = 4.0
-    PET_MULTIPLIER = 1.2
+    PET_MULTIPLIER = 1.1
     
     # Calculate labor hours
     labor_hours = calculate_labor_hours(request)
@@ -516,7 +516,7 @@ async def send_quote_email(request: QuoteRequest, breakdown: QuoteBreakdown, quo
                         <div class="property-details" style="background-color: #f8fafc !important; padding: 25px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #10b981;">
                             <h4 class="text-primary" style="color: #1a1a1a !important; margin-bottom: 18px; font-size: 18px; font-weight: 600;">YOUR PROPERTY:</h4>
                             <div style="display: block;">
-                                <div style="padding: 6px 0; color: #4a5568 !important;">• Total bedrooms: <strong style="color: #1a1a1a !important;">{max(request.beds, request.bedrooms)}</strong></div>
+                                <div style="padding: 6px 0; color: #4a5568 !important;">• Total bedrooms: <strong style="color: #1a1a1a !important;">{request.bedrooms}</strong></div>
                                 <div style="padding: 6px 0; color: #4a5568 !important;">• Full bathrooms: <strong style="color: #1a1a1a !important;">{request.full_bathrooms}</strong></div>
                                 <div style="padding: 6px 0; color: #4a5568 !important;">• Half bathrooms: <strong style="color: #1a1a1a !important;">{request.half_bathrooms}</strong></div>
                                 <div style="padding: 6px 0; color: #4a5568 !important;">• Living rooms: <strong style="color: #1a1a1a !important;">{request.living_rooms}</strong></div>
